@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("TLD_Multiplayer_Project")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+258e39a444515e79aeaa6ba1e7da5ffffcf7c713")]
 [assembly: System.Reflection.AssemblyProductAttribute("TLD_Multiplayer_Project")]
 [assembly: System.Reflection.AssemblyTitleAttribute("TLD_Multiplayer_Project")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

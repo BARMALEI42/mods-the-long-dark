@@ -19,6 +19,9 @@
 		<Reference Include="MelonLoader">
 			<HintPath>C:\the long dark\MelonLoader\net6\MelonLoader.dll</HintPath>
 		</Reference>
+		<Reference Include="Il2CppTLD.IntBackedUnit">
+			<HintPath>C:\the long dark\MelonLoader\Il2CppAssemblies\Il2CppTLD.IntBackedUnit.dll</HintPath>
+		</Reference>
 		<Reference Include="UnityEngine.CoreModule">
 			<HintPath>C:\the long dark\MelonLoader\Il2CppAssemblies\UnityEngine.CoreModule.dll</HintPath>
 		</Reference>

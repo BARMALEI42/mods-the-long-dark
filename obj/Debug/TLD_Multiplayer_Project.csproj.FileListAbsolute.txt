@@ -107,3 +107,4 @@ C:\Users\krake\Desktop\TLD_Multiplayer_Project\obj\Debug\TLD_Multiplayer_Project
 C:\Users\krake\Desktop\TLD_Multiplayer_Project\obj\Debug\refint\TLD_Multiplayer_Project.dll
 C:\Users\krake\Desktop\TLD_Multiplayer_Project\obj\Debug\TLD_Multiplayer_Project.pdb
 C:\Users\krake\Desktop\TLD_Multiplayer_Project\obj\Debug\ref\TLD_Multiplayer_Project.dll
+C:\Users\krake\Desktop\TLD_Multiplayer_Project\obj\Debug\TLD_Multiplayer_Project.sourcelink.json

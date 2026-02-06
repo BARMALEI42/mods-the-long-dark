@@ -4,16 +4,15 @@ using LiteNetLib;
 using LiteNetLib.Utils;
 using MelonLoader;
 using UnityEngine;
+using Il2CppTLD.IntBackedUnit; // Обязательно для работы с m_Units
 
 namespace TLD_Multiplayer
 {
-    // 1. Ломание мебели/объектов
     [HarmonyPatch(typeof(Il2Cpp.BreakDown), "DoBreakDown", new System.Type[] { typeof(bool) })]
     public class BreakPatch
     {
         public static void Postfix(Il2Cpp.BreakDown __instance, bool spawnYieldObjects)
         {
-            // Проверяем, что это не мы сами удалили объект по сети
             if (MainMod.Instance == null) return;
 
             NetDataWriter writer = new NetDataWriter();
@@ -23,21 +22,16 @@ namespace TLD_Multiplayer
             writer.Put(__instance.transform.position.z);
 
             MainMod.Instance._netHandler.Manager.SendToAll(writer, DeliveryMethod.ReliableOrdered);
-            MelonLogger.Msg($"[Отправка] Объект {__instance.name} сломан, координаты отправлены.");
+            MelonLogger.Msg($"[Отправка] Объект {__instance.name} сломан.");
         }
     }
 
-    // 2. ПОДНЯТИЕ ПРЕДМЕТОВ (Исправлено для версии 2.5.1)
     [HarmonyPatch(typeof(Il2Cpp.PlayerManager), "ProcessPickupItemInteraction", new System.Type[] { typeof(Il2Cpp.GearItem), typeof(bool), typeof(bool), typeof(bool) })]
     public class PickupPatch
     {
-        // Мы указываем только те аргументы, которые нам нужны (item), 
-        // Harmony сам поймет, что остальные нужно пропустить.
         public static void Postfix(Il2Cpp.GearItem item)
         {
             if (item == null || MainMod.Instance == null) return;
-
-            MelonLogger.Msg($"[DEBUG] Поднят предмет: {item.name}");
 
             NetDataWriter writer = new NetDataWriter();
             writer.Put((byte)PacketType.ItemPickup);
@@ -49,7 +43,6 @@ namespace TLD_Multiplayer
         }
     }
 
-    // 3. Исправленный хук на выбрасывание предметов
     [HarmonyPatch(typeof(Il2Cpp.GearItem), "Drop", new System.Type[] { typeof(int), typeof(bool), typeof(bool), typeof(bool) })]
     public class DropPatch
     {
@@ -57,21 +50,37 @@ namespace TLD_Multiplayer
         {
             if (MainMod.Instance == null || __instance == null) return;
 
-            // Если предмет выброшен, он больше не в инвентаре, и мы шлем его координаты
-            MelonLogger.Msg($"[DEBUG] Предмет {__instance.name} выброшен. Отправка в сеть...");
-
             NetDataWriter writer = new NetDataWriter();
             writer.Put((byte)PacketType.ItemDrop);
 
-            // Очищаем имя, чтобы LoadGearItemPrefab у другого игрока сработал
             string cleanName = __instance.name.Replace("(Clone)", "").Trim();
             writer.Put(cleanName);
-
             writer.Put(__instance.transform.position.x);
             writer.Put(__instance.transform.position.y);
             writer.Put(__instance.transform.position.z);
 
+            writer.Put(__instance.GetNormalizedCondition());
+            writer.Put(numUnits);
+
+            float extraData = 0f;
+            if (__instance.m_FoodItem != null)
+            {
+                extraData = __instance.m_FoodItem.m_CaloriesRemaining;
+            }
+            else if (__instance.m_KeroseneLampItem != null)
+            {
+                // Чтение значения из структуры IntBackedUnit (через .m_Units)
+                extraData = __instance.m_KeroseneLampItem.m_CurrentFuelLiters.m_Units;
+            }
+            else if (__instance.m_LiquidItem != null)
+            {
+                // Чтение воды (поле m_Liquid найдено через UnityExplorer)
+                extraData = __instance.m_LiquidItem.m_Liquid.m_Units;
+            }
+
+            writer.Put(extraData);
             MainMod.Instance._netHandler.Manager.SendToAll(writer, DeliveryMethod.ReliableOrdered);
+            MelonLogger.Msg($"[DEBUG] Выброшен {cleanName}, состояние: {__instance.GetNormalizedCondition() * 100}%");
         }
     }
 
@@ -96,7 +105,6 @@ namespace TLD_Multiplayer
         }
     }
 
-    // 5. Костры (Используем InstantiateCampFire из твоего дампа)
     [HarmonyPatch(typeof(Il2Cpp.FireManager), "InstantiateCampFire")]
     public class FireSpawnPatch
     {
@@ -112,7 +120,6 @@ namespace TLD_Multiplayer
         }
     }
 
-    // 6. Сон и Ожидание (PassTime вместо Panel_Wait)
     [HarmonyPatch(typeof(Il2Cpp.Panel_Rest), "DoRest")]
     public class SleepPatch { public static void Postfix() => MainMod.Instance.SendSleepVote(true); }
 
